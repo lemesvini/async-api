@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  CONSULTANT  // Teachers
+  STUDENT
+}
+
+enum ClassType {
+  CORPORATE
+  PRIVATE
+}
+
+enum CEFRLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String // Hash this in your application
+  fullName String
+  role     Role
+  salt     String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  consultantClasses Class[] @relation("ConsultantClasses")
+  studentClasses    Class[] @relation("StudentClasses")
+  
+  @@map("users")
+}
+
+// Class model - simplified
+model Class {
+  id            String     @id @default(cuid())
+  type          ClassType
+  hourPrice     Decimal    @db.Decimal(10, 2)
+  monthlyHours  Int
+  currentModule CEFRLevel?
+  
+  // Foreign keys
+  consultantId  String
+  studentId     String? // Null for corporate classes with multiple students
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  // Relations
+  consultant    User       @relation("ConsultantClasses", fields: [consultantId], references: [id])
+  student       User?      @relation("StudentClasses", fields: [studentId], references: [id])
+  
+  @@map("classes")
+}
+
+// Module model
+model Module {
+  id          String    @id @default(cuid())
+  cefr        CEFRLevel
+  name        String
+  description String?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  contents    Content[]
+  
+  @@map("modules")
+}
+
+// Content model
+model Content {
+  id               String  @id @default(cuid())
+  title            String
+  description      String?
+  studentsGuideUrl String?
+  presentationUrl  String?
+  homeworkUrl      String?
+  
+  // Foreign key
+  moduleId         String
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  module           Module   @relation(fields: [moduleId], references: [id])
+  
+  @@map("contents")
+}
