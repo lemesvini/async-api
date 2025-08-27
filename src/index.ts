@@ -1,6 +1,7 @@
 import "dotenv/config";
 import fastify from "fastify";
 import userRoutes from "./modules/user/user.route";
+import classRoutes from "./modules/class/class.route";
 
 const app = fastify();
 
@@ -18,6 +19,7 @@ app.get("/test", async () => {
 
 const start = async () => {
   app.register(userRoutes, { prefix: "api/users" });
+  app.register(classRoutes, { prefix: "api/classes" });
   try {
     await app.listen({ port: 3000, host: "0.0.0.0" });
     console.log("🚀 Server is running on http://localhost:3000");

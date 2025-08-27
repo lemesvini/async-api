@@ -47,15 +47,17 @@ model User {
   updatedAt DateTime @updatedAt
   
   // Relations
-  consultantClasses Class[] @relation("ConsultantClasses")
-  studentClasses    Class[] @relation("StudentClasses")
+  consultantClasses Class[]           @relation("ConsultantClasses")
+  enrollments       ClassEnrollment[] @relation("StudentEnrollments")
   
   @@map("users")
 }
 
-// Class model - simplified
+// Class model - supports multiple students via junction table
 model Class {
   id            String     @id @default(cuid())
+  name          String
+  description   String?
   type          ClassType
   hourPrice     Decimal    @db.Decimal(10, 2)
   monthlyHours  Int
@@ -63,16 +65,31 @@ model Class {
   
   // Foreign keys
   consultantId  String
-  studentId     String? // Null for corporate classes with multiple students
   
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   
   // Relations
-  consultant    User       @relation("ConsultantClasses", fields: [consultantId], references: [id])
-  student       User?      @relation("StudentClasses", fields: [studentId], references: [id])
+  consultant    User              @relation("ConsultantClasses", fields: [consultantId], references: [id])
+  enrollments   ClassEnrollment[] @relation("ClassEnrollments")
   
   @@map("classes")
+}
+
+// Junction table for many-to-many relationship between Class and Student
+model ClassEnrollment {
+  id        String   @id @default(cuid())
+  classId   String
+  studentId String
+  
+  enrolledAt DateTime @default(now())
+  
+  // Relations
+  class     Class    @relation("ClassEnrollments", fields: [classId], references: [id], onDelete: Cascade)
+  student   User     @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
+  
+  @@unique([classId, studentId]) // Prevent duplicate enrollments
+  @@map("class_enrollments")
 }
 
 // Module model
