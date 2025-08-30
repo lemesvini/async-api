@@ -1,6 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
@@ -33,6 +32,26 @@ enum CEFRLevel {
   B2
   C1
   C2
+  CONVERSATION_A1
+  CONVERSATION_A2
+  CONVERSATION_B1
+  CONVERSATION_B2
+  CONVERSATION_C1
+  CONVERSATION_C2
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
 }
 
 model User {
@@ -43,88 +62,163 @@ model User {
   role     Role
   salt     String
   
+  // Campos adicionais para alunos
+  phone         String?
+  birthDate     DateTime?
+  address       String?
+  emergencyContact String?
+  notes         String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
   // Relations
-  consultantClasses Class[]           @relation("ConsultantClasses")
-  enrollments       ClassEnrollment[] @relation("StudentEnrollments")
+  consultantClasses Class[]               @relation("ConsultantClasses")
+  enrollments       ClassEnrollment[]     @relation("StudentEnrollments")
+  attendance        Attendance[]          @relation("StudentAttendance")
+  payments          Payment[]             @relation("StudentPayments")
   
   @@map("users")
 }
 
-// Class model - supports multiple students via junction table
 model Class {
-  id            String     @id @default(cuid())
-  name          String
-  description   String?
-  type          ClassType
-  hourPrice     Decimal    @db.Decimal(10, 2)
-  monthlyHours  Int
-  currentModule CEFRLevel?
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  type        ClassType
+  level       CEFRLevel
+  maxStudents Int       @default(10)
+  isActive    Boolean   @default(true)
   
-  // Foreign keys
-  consultantId  String
+  // Horários
+  startTime   DateTime
+  endTime     DateTime
+  dayOfWeek   Int       // 0 = Domingo, 1 = Segunda, etc.
   
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  // Relações
+  consultantId String
+  consultant   User      @relation("ConsultantClasses", fields: [consultantId], references: [id])
   
-  // Relations
-  consultant    User              @relation("ConsultantClasses", fields: [consultantId], references: [id])
-  enrollments   ClassEnrollment[] @relation("ClassEnrollments")
+  enrollments  ClassEnrollment[]
+  lessons      ClassLesson[]
+  attendance   Attendance[]
+  payments     Payment[]             @relation("ClassPayments")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
   @@map("classes")
 }
 
-// Junction table for many-to-many relationship between Class and Student
 model ClassEnrollment {
   id        String   @id @default(cuid())
+  
   classId   String
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
   studentId String
+  student   User     @relation("StudentEnrollments", fields: [studentId], references: [id])
   
   enrolledAt DateTime @default(now())
+  isActive   Boolean  @default(true)
   
-  // Relations
-  class     Class    @relation("ClassEnrollments", fields: [classId], references: [id], onDelete: Cascade)
-  student   User     @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
-  
-  @@unique([classId, studentId]) // Prevent duplicate enrollments
+  @@unique([classId, studentId])
   @@map("class_enrollments")
 }
 
-// Module model
-model Module {
-  id          String    @id @default(cuid())
-  cefr        CEFRLevel
-  name        String
-  description String?
+model Content {
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  module         CEFRLevel
+  order          Int       // Para ordenar as aulas dentro do módulo
   
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  // URLs dos recursos
+  presentationUrl String?
+  studentsPdfUrl  String?
+  homeworkUrl     String?
   
-  // Relations
-  contents    Content[]
+  isActive       Boolean   @default(true)
   
-  @@map("modules")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relações
+  classLessons ClassLesson[]
+  
+  @@unique([module, order])
+  @@map("contents")
 }
 
-// Content model
-model Content {
-  id               String  @id @default(cuid())
-  title            String
-  description      String?
-  studentsGuideUrl String?
-  presentationUrl  String?
-  homeworkUrl      String?
+model ClassLesson {
+  id       String   @id @default(cuid())
   
-  // Foreign key
-  moduleId         String
+  classId  String
+  class    Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id])
   
-  // Relations
-  module           Module   @relation(fields: [moduleId], references: [id])
+  lessonDate DateTime
+  notes      String?
+  wasCompleted Boolean @default(false)
   
-  @@map("contents")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relações
+  attendance Attendance[]
+  
+  @@map("class_lessons")
+}
+
+model Attendance {
+  id       String           @id @default(cuid())
+  
+  studentId String
+  student   User             @relation("StudentAttendance", fields: [studentId], references: [id])
+  
+  classId   String
+  class     Class            @relation(fields: [classId], references: [id])
+  
+  lessonId  String
+  lesson    ClassLesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  status    AttendanceStatus
+  notes     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([studentId, lessonId])
+  @@map("attendance")
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  
+  studentId String
+  student   User          @relation("StudentPayments", fields: [studentId], references: [id])
+  
+  classId   String?
+  class     Class?        @relation("ClassPayments", fields: [classId], references: [id])
+  
+  amount       Decimal       @db.Decimal(10, 2)
+  description  String
+  status       PaymentStatus @default(PENDING)
+  
+  // Datas
+  dueDate      DateTime
+  paidDate     DateTime?
+  
+  // Período de referência
+  referenceMonth Int  // 1-12
+  referenceYear  Int
+  
+  notes        String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("payments")
 }
