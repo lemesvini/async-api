@@ -23,13 +23,13 @@ async function authRoutes(fastify: FastifyInstance) {
     logoutHandler
   );
 
-  fastify.post(
-    "/change-password",
-    {
-      preHandler: [fastify.authenticate],
-    },
-    changePasswordHandler
-  );
+  // fastify.post(
+  //   "/change-password",
+  //   {
+  //     preHandler: [fastify.authenticate],
+  //   },
+  //   changePasswordHandler
+  // );
 
   fastify.get(
     "/me",
