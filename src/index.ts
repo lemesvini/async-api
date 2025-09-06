@@ -6,6 +6,7 @@ import cors from "@fastify/cors";
 import userRoutes from "./modules/user/user.route";
 import authRoutes from "./modules/auth/auth.route";
 import classRoutes from "./modules/class/class.route";
+import contentsRoutes from "./modules/contents/contents.route";
 import { authenticateUser } from "./middleware/auth.middleware";
 
 const app = fastify();
@@ -51,6 +52,7 @@ const start = async () => {
   app.register(authRoutes, { prefix: "api/auth" });
   app.register(userRoutes, { prefix: "api/users" });
   app.register(classRoutes, { prefix: "api/classes" });
+  app.register(contentsRoutes, { prefix: "api/contents" });
   try {
     await app.listen({ port: 3000, host: "0.0.0.0" });
     console.log("🚀 Server is running on http://localhost:3000");
