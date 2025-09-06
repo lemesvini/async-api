@@ -23,7 +23,7 @@ const createClassSchema = z.object({
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
   dayOfWeek: z.number().min(0).max(6), // 0 = Sunday, 1 = Monday, etc.
-  consultantId: z.string().min(1),
+  consultantId: z.string().min(1).optional(),
 });
 
 const updateClassSchema = z.object({
@@ -110,7 +110,7 @@ const classResponseSchema = z.object({
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
   dayOfWeek: z.number(),
-  consultantId: z.string(),
+  consultantId: z.string().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   consultant: z

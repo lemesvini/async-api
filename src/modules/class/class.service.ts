@@ -8,25 +8,34 @@ import {
 } from "./class.schema";
 
 export async function createClass(input: CreateClassInput) {
-  // Verify consultant exists and has the right role
-  const consultant = await prisma.user.findUnique({
-    where: { id: input.consultantId },
-    select: { id: true, role: true },
-  });
+  // Verify consultant exists and has the right role (if consultant is provided)
+  if (input.consultantId) {
+    const consultant = await prisma.user.findUnique({
+      where: { id: input.consultantId },
+      select: { id: true, role: true },
+    });
 
-  if (!consultant) {
-    throw new Error("Consultant not found");
-  }
+    if (!consultant) {
+      throw new Error("Consultant not found");
+    }
 
-  if (consultant.role !== "CONSULTANT" && consultant.role !== "ADMIN") {
-    throw new Error("User must be a consultant or admin to teach classes");
+    if (consultant.role !== "CONSULTANT" && consultant.role !== "ADMIN") {
+      throw new Error("User must be a consultant or admin to teach classes");
+    }
   }
 
   const classData = await prisma.class.create({
     data: {
-      ...input,
+      name: input.name,
+      description: input.description,
+      type: input.type,
+      level: input.level,
+      maxStudents: input.maxStudents,
+      isActive: input.isActive,
       startTime: new Date(input.startTime),
       endTime: new Date(input.endTime),
+      dayOfWeek: input.dayOfWeek,
+      ...(input.consultantId && { consultantId: input.consultantId }),
     },
     select: {
       id: true,

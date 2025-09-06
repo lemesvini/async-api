@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -13,10 +8,138 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
+model User {
+  id                String            @id @default(cuid())
+  email             String            @unique
+  password          String
+  fullName          String
+  role              Role
+  salt              String
+  phone             String?
+  birthDate         DateTime?
+  address           String?
+  emergencyContact  String?
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  attendance        Attendance[]      @relation("StudentAttendance")
+  enrollments       ClassEnrollment[] @relation("StudentEnrollments")
+  consultantClasses Class[]           @relation("ConsultantClasses")
+  payments          Payment[]         @relation("StudentPayments")
+
+  @@map("users")
+}
+
+model Class {
+  id           String            @id @default(cuid())
+  name         String
+  description  String?
+  type         ClassType
+  level        CEFRLevel
+  maxStudents  Int               @default(10)
+  isActive     Boolean           @default(true)
+  startTime    DateTime
+  endTime      DateTime
+  dayOfWeek    Int
+  consultantId String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  attendance   Attendance[]
+  enrollments  ClassEnrollment[]
+  lessons      ClassLesson[]
+  consultant   User?             @relation("ConsultantClasses", fields: [consultantId], references: [id])
+  payments     Payment[]         @relation("ClassPayments")
+
+  @@map("classes")
+}
+
+model ClassEnrollment {
+  id         String   @id @default(cuid())
+  classId    String
+  studentId  String
+  enrolledAt DateTime @default(now())
+  isActive   Boolean  @default(true)
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student    User     @relation("StudentEnrollments", fields: [studentId], references: [id])
+
+  @@unique([classId, studentId])
+  @@map("class_enrollments")
+}
+
+model Content {
+  id              String        @id @default(cuid())
+  title           String
+  description     String?
+  module          CEFRLevel
+  order           Int
+  presentationUrl String?
+  studentsPdfUrl  String?
+  homeworkUrl     String?
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  classLessons    ClassLesson[]
+
+  @@unique([module, order])
+  @@map("contents")
+}
+
+model ClassLesson {
+  id           String       @id @default(cuid())
+  classId      String
+  contentId    String
+  lessonDate   DateTime
+  notes        String?
+  wasCompleted Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  attendance   Attendance[]
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  content      Content      @relation(fields: [contentId], references: [id])
+
+  @@map("class_lessons")
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  studentId String
+  classId   String
+  lessonId  String
+  status    AttendanceStatus
+  notes     String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  class     Class            @relation(fields: [classId], references: [id])
+  lesson    ClassLesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  student   User             @relation("StudentAttendance", fields: [studentId], references: [id])
+
+  @@unique([studentId, lessonId])
+  @@map("attendance")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  studentId      String
+  classId        String?
+  amount         Decimal       @db.Decimal(10, 2)
+  description    String
+  status         PaymentStatus @default(PENDING)
+  dueDate        DateTime
+  paidDate       DateTime?
+  referenceMonth Int
+  referenceYear  Int
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  class          Class?        @relation("ClassPayments", fields: [classId], references: [id])
+  student        User          @relation("StudentPayments", fields: [studentId], references: [id])
+
+  @@map("payments")
+}
+
 enum Role {
   ADMIN
-  CONSULTANT  // Teachers
+  CONSULTANT
   STUDENT
 }
 
@@ -52,173 +175,4 @@ enum PaymentStatus {
   PAID
   OVERDUE
   CANCELLED
-}
-
-model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String // Hash this in your application
-  fullName String
-  role     Role
-  salt     String
-  
-  // Campos adicionais para alunos
-  phone         String?
-  birthDate     DateTime?
-  address       String?
-  emergencyContact String?
-  notes         String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  consultantClasses Class[]               @relation("ConsultantClasses")
-  enrollments       ClassEnrollment[]     @relation("StudentEnrollments")
-  attendance        Attendance[]          @relation("StudentAttendance")
-  payments          Payment[]             @relation("StudentPayments")
-  
-  @@map("users")
-}
-
-model Class {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  type        ClassType
-  level       CEFRLevel
-  maxStudents Int       @default(10)
-  isActive    Boolean   @default(true)
-  
-  // Horários
-  startTime   DateTime
-  endTime     DateTime
-  dayOfWeek   Int       // 0 = Domingo, 1 = Segunda, etc.
-  
-  // Relações
-  consultantId String
-  consultant   User      @relation("ConsultantClasses", fields: [consultantId], references: [id])
-  
-  enrollments  ClassEnrollment[]
-  lessons      ClassLesson[]
-  attendance   Attendance[]
-  payments     Payment[]             @relation("ClassPayments")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("classes")
-}
-
-model ClassEnrollment {
-  id        String   @id @default(cuid())
-  
-  classId   String
-  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
-  
-  studentId String
-  student   User     @relation("StudentEnrollments", fields: [studentId], references: [id])
-  
-  enrolledAt DateTime @default(now())
-  isActive   Boolean  @default(true)
-  
-  @@unique([classId, studentId])
-  @@map("class_enrollments")
-}
-
-model Content {
-  id             String    @id @default(cuid())
-  title          String
-  description    String?
-  module         CEFRLevel
-  order          Int       // Para ordenar as aulas dentro do módulo
-  
-  // URLs dos recursos
-  presentationUrl String?
-  studentsPdfUrl  String?
-  homeworkUrl     String?
-  
-  isActive       Boolean   @default(true)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relações
-  classLessons ClassLesson[]
-  
-  @@unique([module, order])
-  @@map("contents")
-}
-
-model ClassLesson {
-  id       String   @id @default(cuid())
-  
-  classId  String
-  class    Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
-  
-  contentId String
-  content   Content  @relation(fields: [contentId], references: [id])
-  
-  lessonDate DateTime
-  notes      String?
-  wasCompleted Boolean @default(false)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relações
-  attendance Attendance[]
-  
-  @@map("class_lessons")
-}
-
-model Attendance {
-  id       String           @id @default(cuid())
-  
-  studentId String
-  student   User             @relation("StudentAttendance", fields: [studentId], references: [id])
-  
-  classId   String
-  class     Class            @relation(fields: [classId], references: [id])
-  
-  lessonId  String
-  lesson    ClassLesson      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  
-  status    AttendanceStatus
-  notes     String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@unique([studentId, lessonId])
-  @@map("attendance")
-}
-
-model Payment {
-  id        String        @id @default(cuid())
-  
-  studentId String
-  student   User          @relation("StudentPayments", fields: [studentId], references: [id])
-  
-  classId   String?
-  class     Class?        @relation("ClassPayments", fields: [classId], references: [id])
-  
-  amount       Decimal       @db.Decimal(10, 2)
-  description  String
-  status       PaymentStatus @default(PENDING)
-  
-  // Datas
-  dueDate      DateTime
-  paidDate     DateTime?
-  
-  // Período de referência
-  referenceMonth Int  // 1-12
-  referenceYear  Int
-  
-  notes        String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("payments")
 }
