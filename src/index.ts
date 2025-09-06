@@ -21,6 +21,7 @@ app.register(cors, {
     "http://localhost:5174", // Vite alternative port
     "http://localhost:3000", // Alternative port
     "http://localhost:4173", // Vite preview port
+    "https://async-app-omega.vercel.app", // Production deployment
   ],
   credentials: true, // Allow cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],

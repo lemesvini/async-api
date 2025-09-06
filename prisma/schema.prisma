@@ -14,13 +14,13 @@ model User {
   fullName          String
   role              Role
   salt              String
-  phone             String?
-  birthDate         DateTime?
-  address           String?
-  emergencyContact  String?
-  notes             String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+  address           String?
+  birthDate         DateTime?
+  emergencyContact  String?
+  notes             String?
+  phone             String?
   attendance        Attendance[]      @relation("StudentAttendance")
   enrollments       ClassEnrollment[] @relation("StudentEnrollments")
   consultantClasses Class[]           @relation("ConsultantClasses")
@@ -31,18 +31,18 @@ model User {
 
 model Class {
   id           String            @id @default(cuid())
-  name         String
-  description  String?
   type         ClassType
-  level        CEFRLevel
-  maxStudents  Int               @default(10)
-  isActive     Boolean           @default(true)
-  startTime    DateTime
-  endTime      DateTime
-  dayOfWeek    Int
   consultantId String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
+  description  String?
+  name         String
+  dayOfWeek    Int
+  endTime      DateTime
+  isActive     Boolean           @default(true)
+  level        CEFRLevel
+  maxStudents  Int               @default(10)
+  startTime    DateTime
   attendance   Attendance[]
   enrollments  ClassEnrollment[]
   lessons      ClassLesson[]
@@ -69,14 +69,14 @@ model Content {
   id              String        @id @default(cuid())
   title           String
   description     String?
-  module          CEFRLevel
-  order           Int
   presentationUrl String?
-  studentsPdfUrl  String?
   homeworkUrl     String?
-  isActive        Boolean       @default(true)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  isActive        Boolean       @default(true)
+  module          CEFRLevel
+  order           Int
+  studentsPdfUrl  String?
   classLessons    ClassLesson[]
 
   @@unique([module, order])
