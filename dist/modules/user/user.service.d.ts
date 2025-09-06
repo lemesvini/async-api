@@ -1,30 +1,28 @@
-import { CreateUserInput, UpdateUserInput, GetUsersQuery, GetUserParams } from "./user.schema";
+import { CreateUserInput, UpdateUserInput, GetUserParams } from "./user.schema";
 export declare function createUser(input: CreateUserInput): Promise<{
+    createdAt: string;
+    updatedAt: string;
     email: string;
-    password: string;
     fullName: string;
-    role: import("../../generated/prisma").$Enums.Role;
+    role: import("@prisma/client").$Enums.Role;
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    salt: string;
 }>;
 export declare function getUserById(params: GetUserParams): Promise<{
+    createdAt: string;
+    updatedAt: string;
     email: string;
     fullName: string;
-    role: import("../../generated/prisma").$Enums.Role;
+    role: import("@prisma/client").$Enums.Role;
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
 } | null>;
-export declare function getUsers(query: GetUsersQuery): Promise<{
+export declare function getUsers(query?: any): Promise<{
     users: {
+        createdAt: string;
+        updatedAt: string;
         email: string;
         fullName: string;
-        role: import("../../generated/prisma").$Enums.Role;
+        role: import("@prisma/client").$Enums.Role;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
     }[];
     total: number;
     page: number;
@@ -32,12 +30,12 @@ export declare function getUsers(query: GetUsersQuery): Promise<{
     totalPages: number;
 }>;
 export declare function updateUser(params: GetUserParams, input: UpdateUserInput): Promise<{
+    createdAt: string;
+    updatedAt: string;
     email: string;
     fullName: string;
-    role: import("../../generated/prisma").$Enums.Role;
+    role: import("@prisma/client").$Enums.Role;
     id: string;
-    createdAt: Date;
-    updatedAt: Date;
 }>;
 export declare function deleteUser(params: GetUserParams): Promise<{
     message: string;

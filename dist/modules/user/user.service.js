@@ -19,8 +19,20 @@ async function createUser(input) {
             password: hash,
             salt,
         },
+        select: {
+            id: true,
+            email: true,
+            fullName: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+        },
     });
-    return user;
+    return {
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+    };
 }
 async function getUserById(params) {
     const user = await prisma_1.default.user.findUnique({
@@ -36,11 +48,17 @@ async function getUserById(params) {
             updatedAt: true,
         },
     });
-    return user;
+    if (!user)
+        return null;
+    return {
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+    };
 }
-async function getUsers(query) {
-    const page = parseInt(query.page);
-    const limit = parseInt(query.limit);
+async function getUsers(query = {}) {
+    const page = parseInt(query.page || "1");
+    const limit = parseInt(query.limit || "10");
     const skip = (page - 1) * limit;
     const whereClause = query.role ? { role: query.role } : {};
     const [users, total] = await Promise.all([
@@ -57,7 +75,7 @@ async function getUsers(query) {
             skip,
             take: limit,
             orderBy: {
-                createdAt: 'desc',
+                createdAt: "desc",
             },
         }),
         prisma_1.default.user.count({
@@ -65,8 +83,14 @@ async function getUsers(query) {
         }),
     ]);
     const totalPages = Math.ceil(total / limit);
+    // Convert dates to ISO strings
+    const serializedUsers = users.map((user) => ({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+    }));
     return {
-        users,
+        users: serializedUsers,
         total,
         page,
         limit,
@@ -94,7 +118,11 @@ async function updateUser(params, input) {
             updatedAt: true,
         },
     });
-    return user;
+    return {
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+    };
 }
 async function deleteUser(params) {
     await prisma_1.default.user.delete({

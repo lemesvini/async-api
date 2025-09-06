@@ -23,8 +23,8 @@ declare const getUserParamsSchema: z.ZodObject<{
     id: z.ZodString;
 }, z.core.$strip>;
 declare const getUsersQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodString>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodString>>;
+    page: z.ZodOptional<z.ZodString>;
+    limit: z.ZodOptional<z.ZodString>;
     role: z.ZodOptional<z.ZodEnum<{
         ADMIN: "ADMIN";
         CONSULTANT: "CONSULTANT";
@@ -71,5 +71,5 @@ export type GetUsersQuery = z.infer<typeof getUsersQuerySchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
 export type GetUsersResponse = z.infer<typeof getUsersResponseSchema>;
 export type DeleteUserResponse = z.infer<typeof deleteUserResponseSchema>;
-export { createUserSchema, updateUserSchema, getUserParamsSchema, getUsersQuerySchema, userResponseSchema, getUsersResponseSchema, deleteUserResponseSchema };
+export { createUserSchema, updateUserSchema, getUserParamsSchema, getUsersQuerySchema, userResponseSchema, getUsersResponseSchema, deleteUserResponseSchema, };
 //# sourceMappingURL=user.schema.d.ts.map

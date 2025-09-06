@@ -34,7 +34,7 @@ async function getUserHandler(request, reply) {
 async function getUsersHandler(request, reply) {
     const query = request.query;
     try {
-        const result = await (0, user_service_1.getUsers)(query);
+        const result = await (0, user_service_1.getUsers)(query || {});
         reply.send(result);
     }
     catch (error) {
@@ -51,7 +51,7 @@ async function updateUserHandler(request, reply) {
     }
     catch (error) {
         console.error(error);
-        if (error?.code === 'P2025') {
+        if (error?.code === "P2025") {
             return reply.status(404).send({ error: "User not found" });
         }
         reply.status(500).send({ error: "Failed to update user" });
@@ -65,7 +65,7 @@ async function deleteUserHandler(request, reply) {
     }
     catch (error) {
         console.error(error);
-        if (error?.code === 'P2025') {
+        if (error?.code === "P2025") {
             return reply.status(404).send({ error: "User not found" });
         }
         reply.status(500).send({ error: "Failed to delete user" });

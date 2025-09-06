@@ -5,47 +5,55 @@ const user_schema_1 = require("./user.schema");
 async function userRoutes(server) {
     // Create user (POST /)
     server.post("/", {
-        schema: {
-            body: user_schema_1.createUserSchema,
-            response: { 201: user_schema_1.userResponseSchema },
+        preHandler: async (request, reply) => {
+            try {
+                request.body = user_schema_1.createUserSchema.parse(request.body);
+            }
+            catch (error) {
+                reply
+                    .status(400)
+                    .send({ error: "Invalid request body", details: error });
+            }
         },
     }, user_controller_1.registerUserHandler);
     // Get all users (GET /)
-    server.get("/", {
-        schema: {
-            querystring: user_schema_1.getUsersQuerySchema,
-            response: { 200: user_schema_1.getUsersResponseSchema },
-        },
-    }, user_controller_1.getUsersHandler);
+    server.get("/", user_controller_1.getUsersHandler);
     // Get user by ID (GET /:id)
     server.get("/:id", {
-        schema: {
-            params: user_schema_1.getUserParamsSchema,
-            response: {
-                200: user_schema_1.userResponseSchema,
-                404: { type: 'object', properties: { error: { type: 'string' } } }
-            },
+        preHandler: async (request, reply) => {
+            try {
+                request.params = user_schema_1.getUserParamsSchema.parse(request.params);
+            }
+            catch (error) {
+                reply
+                    .status(400)
+                    .send({ error: "Invalid parameters", details: error });
+            }
         },
     }, user_controller_1.getUserHandler);
     // Update user (PUT /:id)
     server.put("/:id", {
-        schema: {
-            params: user_schema_1.getUserParamsSchema,
-            body: user_schema_1.updateUserSchema,
-            response: {
-                200: user_schema_1.userResponseSchema,
-                404: { type: 'object', properties: { error: { type: 'string' } } }
-            },
+        preHandler: async (request, reply) => {
+            try {
+                request.params = user_schema_1.getUserParamsSchema.parse(request.params);
+                request.body = user_schema_1.updateUserSchema.parse(request.body);
+            }
+            catch (error) {
+                reply.status(400).send({ error: "Invalid request", details: error });
+            }
         },
     }, user_controller_1.updateUserHandler);
     // Delete user (DELETE /:id)
     server.delete("/:id", {
-        schema: {
-            params: user_schema_1.getUserParamsSchema,
-            response: {
-                200: user_schema_1.deleteUserResponseSchema,
-                404: { type: 'object', properties: { error: { type: 'string' } } }
-            },
+        preHandler: async (request, reply) => {
+            try {
+                request.params = user_schema_1.getUserParamsSchema.parse(request.params);
+            }
+            catch (error) {
+                reply
+                    .status(400)
+                    .send({ error: "Invalid parameters", details: error });
+            }
         },
     }, user_controller_1.deleteUserHandler);
 }

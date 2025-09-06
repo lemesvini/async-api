@@ -21,8 +21,8 @@ const getUserParamsSchema = zod_1.z.object({
 });
 exports.getUserParamsSchema = getUserParamsSchema;
 const getUsersQuerySchema = zod_1.z.object({
-    page: zod_1.z.string().optional().default("1"),
-    limit: zod_1.z.string().optional().default("10"),
+    page: zod_1.z.string().optional(),
+    limit: zod_1.z.string().optional(),
     role: zod_1.z.enum(["ADMIN", "CONSULTANT", "STUDENT"]).optional(),
 });
 exports.getUsersQuerySchema = getUsersQuerySchema;
