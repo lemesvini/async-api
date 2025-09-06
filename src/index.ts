@@ -8,6 +8,8 @@ import authRoutes from "./modules/auth/auth.route";
 import classRoutes from "./modules/class/class.route";
 import contentsRoutes from "./modules/contents/contents.route";
 import lessonRoutes from "./modules/lesson/lesson.route";
+import dashboardRoutes from "./modules/dashboard/dashboard.route";
+import paymentRoutes from "./modules/payment/payment.route";
 import { authenticateUser } from "./middleware/auth.middleware";
 
 const app = fastify();
@@ -21,7 +23,8 @@ app.register(cors, {
     "http://localhost:4173", // Vite preview port
   ],
   credentials: true, // Allow cookies
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 // Register plugins
@@ -55,6 +58,8 @@ const start = async () => {
   app.register(classRoutes, { prefix: "api/classes" });
   app.register(contentsRoutes, { prefix: "api/contents" });
   app.register(lessonRoutes, { prefix: "api/lessons" });
+  app.register(dashboardRoutes, { prefix: "api/dashboard" });
+  app.register(paymentRoutes, { prefix: "api/payments" });
   try {
     await app.listen({ port: 3000, host: "0.0.0.0" });
     console.log("🚀 Server is running on http://localhost:3000");
