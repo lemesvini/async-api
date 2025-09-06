@@ -11,6 +11,7 @@ import {
   CreateContentInput,
   UpdateContentInput,
   GetContentParams,
+  GetContentsByModuleParams,
   GetContentsQuery,
 } from "./contents.schema";
 
@@ -126,7 +127,7 @@ export async function deleteContentHandler(
 
 export async function getContentsByModuleHandler(
   request: FastifyRequest<{
-    Params: { module: string };
+    Params: GetContentsByModuleParams;
   }>,
   reply: FastifyReply
 ) {

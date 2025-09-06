@@ -54,6 +54,23 @@ const getContentParamsSchema = z.object({
   id: z.string(),
 });
 
+const getContentsByModuleParamsSchema = z.object({
+  module: z.enum([
+    "A1",
+    "A2",
+    "B1",
+    "B2",
+    "C1",
+    "C2",
+    "CONVERSATION_A1",
+    "CONVERSATION_A2",
+    "CONVERSATION_B1",
+    "CONVERSATION_B2",
+    "CONVERSATION_C1",
+    "CONVERSATION_C2",
+  ]),
+});
+
 const getContentsQuerySchema = z.object({
   page: z.string().optional(),
   limit: z.string().optional(),
@@ -133,6 +150,9 @@ const deleteContentResponseSchema = z.object({
 export type CreateContentInput = z.infer<typeof createContentSchema>;
 export type UpdateContentInput = z.infer<typeof updateContentSchema>;
 export type GetContentParams = z.infer<typeof getContentParamsSchema>;
+export type GetContentsByModuleParams = z.infer<
+  typeof getContentsByModuleParamsSchema
+>;
 export type GetContentsQuery = z.infer<typeof getContentsQuerySchema>;
 export type ContentResponse = z.infer<typeof contentResponseSchema>;
 export type GetContentsResponse = z.infer<typeof getContentsResponseSchema>;
@@ -142,6 +162,7 @@ export {
   createContentSchema,
   updateContentSchema,
   getContentParamsSchema,
+  getContentsByModuleParamsSchema,
   getContentsQuerySchema,
   contentResponseSchema,
   getContentsResponseSchema,

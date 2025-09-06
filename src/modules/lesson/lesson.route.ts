@@ -1,27 +1,26 @@
 import { FastifyInstance } from "fastify";
 import {
-  createContentHandler,
-  getContentHandler,
-  getContentsHandler,
-  updateContentHandler,
-  deleteContentHandler,
-  getContentsByModuleHandler,
-} from "./contents.controller";
+  createLessonHandler,
+  getLessonHandler,
+  getClassLessonsHandler,
+  updateLessonHandler,
+  deleteLessonHandler,
+} from "./lesson.controller";
 import {
-  createContentSchema,
-  updateContentSchema,
-  getContentParamsSchema,
-  getContentsByModuleParamsSchema,
-} from "./contents.schema";
+  createLessonSchema,
+  updateLessonSchema,
+  getLessonParamsSchema,
+  getClassLessonsParamsSchema,
+} from "./lesson.schema";
 
-async function contentsRoutes(server: FastifyInstance) {
-  // Create content (POST /)
+async function lessonRoutes(server: FastifyInstance) {
+  // Create lesson (POST /)
   server.post(
     "/",
     {
       preHandler: async (request, reply) => {
         try {
-          request.body = createContentSchema.parse(request.body);
+          request.body = createLessonSchema.parse(request.body);
         } catch (error) {
           reply
             .status(400)
@@ -29,19 +28,16 @@ async function contentsRoutes(server: FastifyInstance) {
         }
       },
     },
-    createContentHandler
+    createLessonHandler
   );
 
-  // Get all contents (GET /)
-  server.get("/", getContentsHandler);
-
-  // Get content by ID (GET /:id)
+  // Get lesson by ID (GET /:id)
   server.get(
     "/:id",
     {
       preHandler: async (request, reply) => {
         try {
-          request.params = getContentParamsSchema.parse(request.params);
+          request.params = getLessonParamsSchema.parse(request.params);
         } catch (error) {
           reply
             .status(400)
@@ -49,32 +45,32 @@ async function contentsRoutes(server: FastifyInstance) {
         }
       },
     },
-    getContentHandler
+    getLessonHandler
   );
 
-  // Update content (PUT /:id)
+  // Update lesson (PUT /:id)
   server.put(
     "/:id",
     {
       preHandler: async (request, reply) => {
         try {
-          request.params = getContentParamsSchema.parse(request.params);
-          request.body = updateContentSchema.parse(request.body);
+          request.params = getLessonParamsSchema.parse(request.params);
+          request.body = updateLessonSchema.parse(request.body);
         } catch (error) {
           reply.status(400).send({ error: "Invalid request", details: error });
         }
       },
     },
-    updateContentHandler
+    updateLessonHandler
   );
 
-  // Delete content (DELETE /:id)
+  // Delete lesson (DELETE /:id)
   server.delete(
     "/:id",
     {
       preHandler: async (request, reply) => {
         try {
-          request.params = getContentParamsSchema.parse(request.params);
+          request.params = getLessonParamsSchema.parse(request.params);
         } catch (error) {
           reply
             .status(400)
@@ -82,18 +78,16 @@ async function contentsRoutes(server: FastifyInstance) {
         }
       },
     },
-    deleteContentHandler
+    deleteLessonHandler
   );
 
-  // Get contents by module (GET /module/:module)
+  // Get lessons for a class (GET /class/:classId)
   server.get(
-    "/module/:module",
+    "/class/:classId",
     {
       preHandler: async (request, reply) => {
         try {
-          request.params = getContentsByModuleParamsSchema.parse(
-            request.params
-          );
+          request.params = getClassLessonsParamsSchema.parse(request.params);
         } catch (error) {
           reply
             .status(400)
@@ -101,8 +95,8 @@ async function contentsRoutes(server: FastifyInstance) {
         }
       },
     },
-    getContentsByModuleHandler
+    getClassLessonsHandler
   );
 }
 
-export default contentsRoutes;
+export default lessonRoutes;
