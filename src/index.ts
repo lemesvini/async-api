@@ -16,33 +16,7 @@ const app = fastify();
 
 // Register CORS plugin
 app.register(cors, {
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      "http://localhost:5173", // Vite default port
-      "http://localhost:5174", // Vite alternative port
-      "http://localhost:3000", // Alternative port
-      "http://localhost:4173", // Vite preview port
-      "https://async-app-omega.vercel.app", // Production deployment
-    ];
-
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // Check if the origin is in our allowed list
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // For development, allow any localhost or .vercel.app domains
-    if (
-      origin.startsWith("http://localhost:") ||
-      origin.endsWith(".vercel.app")
-    ) {
-      return callback(null, true);
-    }
-
-    return callback(new Error("Not allowed by CORS"), false);
-  },
+  origin: true, // Reflect request origin
   credentials: true, // Allow cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
