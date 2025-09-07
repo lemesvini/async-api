@@ -20,7 +20,7 @@ app.register(cors, {
     "http://localhost:3000",
     "http://localhost:5173", // Vite dev server
     "https://async-app-omega.vercel.app", // Production frontend
-    /\.vercel\.app$/ // Allow any Vercel preview deployments
+    /\.vercel\.app$/, // Allow any Vercel preview deployments
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -31,11 +31,11 @@ app.register(cors, {
     "Api-Version",
     "Origin",
     "X-Requested-With",
-    "Authorization"
+    "Authorization",
   ],
   exposedHeaders: ["Set-Cookie"],
   preflightContinue: false,
-  optionsSuccessStatus: 200 // Use 200 instead of 204 for better compatibility
+  optionsSuccessStatus: 200, // Use 200 instead of 204 for better compatibility
 });
 
 // Register plugins
