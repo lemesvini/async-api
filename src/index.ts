@@ -16,7 +16,12 @@ const app = fastify();
 
 // Register CORS plugin
 app.register(cors, {
-  origin: true, // Reflect request origin
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:5173", // Vite dev server
+    "https://async-app-omega.vercel.app", // Production frontend
+    /\.vercel\.app$/ // Allow any Vercel preview deployments
+  ],
   credentials: true, // Allow cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
