@@ -15,6 +15,23 @@ const app = fastify({
   logger: true,
 });
 
+// Add global hook to handle CORS manually
+app.addHook('onRequest', async (request, reply) => {
+  // Set CORS headers for all requests
+  reply.header('Access-Control-Allow-Origin', '*');
+  reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  reply.header('Access-Control-Allow-Credentials', 'true');
+});
+
+// Handle preflight OPTIONS requests
+app.addHook('onRequest', async (request, reply) => {
+  if (request.method === 'OPTIONS') {
+    reply.status(200).send();
+    return;
+  }
+});
+
 // Register plugins
 app.register(jwt, {
   secret: process.env.JWT_SECRET || "supersecretkey-change-in-production",
