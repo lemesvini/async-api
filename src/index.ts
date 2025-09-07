@@ -17,16 +17,25 @@ const app = fastify({
 
 // Add global hook to handle CORS manually
 app.addHook("onRequest", async (request, reply) => {
-  // Set CORS headers for all requests
-  reply.header("Access-Control-Allow-Origin", "*");
-  reply.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-  );
-  reply.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-  );
+  const origin = request.headers.origin;
+  
+  // List of allowed origins
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://async-app-omega.vercel.app"
+  ];
+  
+  // Check if origin is allowed or matches Vercel pattern
+  if (origin && (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin))) {
+    reply.header("Access-Control-Allow-Origin", origin);
+  } else if (!origin) {
+    // Allow requests with no origin (Postman, mobile apps, etc.)
+    reply.header("Access-Control-Allow-Origin", "*");
+  }
+  
+  reply.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+  reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
   reply.header("Access-Control-Allow-Credentials", "true");
 });
 
