@@ -14,7 +14,7 @@ import { authenticateUser } from "./middleware/auth.middleware";
 
 const app = fastify();
 
-// Register CORS plugin
+// Register CORS plugin with Vercel-compatible configuration
 app.register(cors, {
   origin: [
     "http://localhost:3000",
@@ -22,9 +22,20 @@ app.register(cors, {
     "https://async-app-omega.vercel.app", // Production frontend
     /\.vercel\.app$/ // Allow any Vercel preview deployments
   ],
-  credentials: true, // Allow cookies
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: [
+    "Accept",
+    "Accept-Version",
+    "Content-Type",
+    "Api-Version",
+    "Origin",
+    "X-Requested-With",
+    "Authorization"
+  ],
+  exposedHeaders: ["Set-Cookie"],
+  preflightContinue: false,
+  optionsSuccessStatus: 200 // Use 200 instead of 204 for better compatibility
 });
 
 // Register plugins
