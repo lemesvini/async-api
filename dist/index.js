@@ -7,7 +7,6 @@ require("dotenv/config");
 const fastify_1 = __importDefault(require("fastify"));
 const jwt_1 = __importDefault(require("@fastify/jwt"));
 const cookie_1 = __importDefault(require("@fastify/cookie"));
-const cors_1 = __importDefault(require("@fastify/cors"));
 const user_route_1 = __importDefault(require("./modules/user/user.route"));
 const auth_route_1 = __importDefault(require("./modules/auth/auth.route"));
 const class_route_1 = __importDefault(require("./modules/class/class.route"));
@@ -16,18 +15,23 @@ const lesson_route_1 = __importDefault(require("./modules/lesson/lesson.route"))
 const dashboard_route_1 = __importDefault(require("./modules/dashboard/dashboard.route"));
 const payment_route_1 = __importDefault(require("./modules/payment/payment.route"));
 const auth_middleware_1 = require("./middleware/auth.middleware");
-const app = (0, fastify_1.default)();
-// Register CORS plugin
-app.register(cors_1.default, {
-    origin: [
-        "http://localhost:5173", // Vite default port
-        "http://localhost:5174", // Vite alternative port
-        "http://localhost:3000", // Alternative port
-        "http://localhost:4173", // Vite preview port
-    ],
-    credentials: true, // Allow cookies
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+const app = (0, fastify_1.default)({
+    logger: true,
+});
+// Add global hook to handle CORS manually
+app.addHook("onRequest", async (request, reply) => {
+    // Set CORS headers for all requests
+    reply.header("Access-Control-Allow-Origin", "*");
+    reply.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+    reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+    reply.header("Access-Control-Allow-Credentials", "true");
+});
+// Handle preflight OPTIONS requests
+app.addHook("onRequest", async (request, reply) => {
+    if (request.method === "OPTIONS") {
+        reply.status(200).send();
+        return;
+    }
 });
 // Register plugins
 app.register(jwt_1.default, {
