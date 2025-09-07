@@ -2,7 +2,6 @@ import "dotenv/config";
 import fastify from "fastify";
 import jwt from "@fastify/jwt";
 import cookie from "@fastify/cookie";
-import cors from "@fastify/cors";
 import userRoutes from "./modules/user/user.route";
 import authRoutes from "./modules/auth/auth.route";
 import classRoutes from "./modules/class/class.route";
@@ -12,30 +11,8 @@ import dashboardRoutes from "./modules/dashboard/dashboard.route";
 import paymentRoutes from "./modules/payment/payment.route";
 import { authenticateUser } from "./middleware/auth.middleware";
 
-const app = fastify();
-
-// Register CORS plugin with Vercel-compatible configuration
-app.register(cors, {
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173", // Vite dev server
-    "https://async-app-omega.vercel.app", // Production frontend
-    /\.vercel\.app$/, // Allow any Vercel preview deployments
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: [
-    "Accept",
-    "Accept-Version",
-    "Content-Type",
-    "Api-Version",
-    "Origin",
-    "X-Requested-With",
-    "Authorization",
-  ],
-  exposedHeaders: ["Set-Cookie"],
-  preflightContinue: false,
-  optionsSuccessStatus: 200, // Use 200 instead of 204 for better compatibility
+const app = fastify({
+  logger: true,
 });
 
 // Register plugins
