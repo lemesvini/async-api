@@ -73,16 +73,19 @@ app.get("/test", async () => {
 });
 
 const start = async () => {
-  app.register(authRoutes, { prefix: "api/auth" });
-  app.register(userRoutes, { prefix: "api/users" });
-  app.register(classRoutes, { prefix: "api/classes" });
-  app.register(contentsRoutes, { prefix: "api/contents" });
-  app.register(lessonRoutes, { prefix: "api/lessons" });
-  app.register(dashboardRoutes, { prefix: "api/dashboard" });
-  app.register(paymentRoutes, { prefix: "api/payments" });
+  app.register(authRoutes, { prefix: "/api/auth" });
+  app.register(userRoutes, { prefix: "/api/users" });
+  app.register(classRoutes, { prefix: "/api/classes" });
+  app.register(contentsRoutes, { prefix: "/api/contents" });
+  app.register(lessonRoutes, { prefix: "/api/lessons" });
+  app.register(dashboardRoutes, { prefix: "/api/dashboard" });
+  app.register(paymentRoutes, { prefix: "/api/payments" });
   try {
-    await app.listen({ port: 3000, host: "0.0.0.0" });
-    console.log("🚀 Server is running on http://localhost:3000");
+    const port = parseInt(process.env.PORT || "3000", 10);
+    const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+    
+    await app.listen({ port, host: "0.0.0.0" });
+    console.log(`🚀 Server is running on http://${host}:${port}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);
