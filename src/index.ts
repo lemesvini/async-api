@@ -18,24 +18,33 @@ const app = fastify({
 // Add global hook to handle CORS manually
 app.addHook("onRequest", async (request, reply) => {
   const origin = request.headers.origin;
-  
+
   // List of allowed origins
   const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://async-app-omega.vercel.app"
+    "https://async-app-omega.vercel.app",
   ];
-  
+
   // Check if origin is allowed or matches Vercel pattern
-  if (origin && (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin))) {
+  if (
+    origin &&
+    (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin))
+  ) {
     reply.header("Access-Control-Allow-Origin", origin);
   } else if (!origin) {
     // Allow requests with no origin (Postman, mobile apps, etc.)
     reply.header("Access-Control-Allow-Origin", "*");
   }
-  
-  reply.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-  reply.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+
+  reply.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+  );
+  reply.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+  );
   reply.header("Access-Control-Allow-Credentials", "true");
 });
 
@@ -82,8 +91,9 @@ const start = async () => {
   app.register(paymentRoutes, { prefix: "/api/payments" });
   try {
     const port = parseInt(process.env.PORT || "3000", 10);
-    const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
-    
+    const host =
+      process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+
     await app.listen({ port, host: "0.0.0.0" });
     console.log(`🚀 Server is running on http://${host}:${port}`);
   } catch (err) {
